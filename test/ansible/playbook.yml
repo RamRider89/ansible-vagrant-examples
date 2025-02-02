@@ -1,0 +1,78 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Actualizar caché de apt (Todos)
+      apt: update_cache=yes
+
+- hosts: webserver
+  become: true
+  tasks:
+    - name: Instalar nginx - Webserver(Node1)
+      apt: pkg=nginx state=present
+
+    - name: Instalar php y dependencias
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+        state: present
+      loop:
+        - ghostscript
+        - unzip
+        - php-fpm
+        - php-bcmath
+        - php-curl
+        - php-imagick
+        - php-intl
+        - php-json
+        - php-mbstring
+        - php-mysql
+        - php-xml
+        - php-zip
+
+    - name: Asegurar que nginx esté corriendo (Node1)
+      service: name=nginx state=started
+
+    - name: Copiar info.php (Node1)
+      copy:
+        src: files/info.php
+        dest: /var/www/html/info.php
+        mode: 0755
+
+    - name: Copiar dbtest (Node1)
+      copy:
+        src: files/dbtest.php
+        dest: /var/www/html/dbtest.php
+        mode: 0755
+
+    - name: Fin del playbook
+      debug: msg="CONTENT = Este es el nodo1 - webserver"
+
+- hosts: dataserver
+  become: true
+  tasks:
+
+   - name: Instalar mysql - Dataserver(Node2)
+     apt: pkg=mysql-server state=present
+
+   - name: Create Application Database
+     mysql_db:
+       name: "test"
+       state: present
+
+   - name: Create Application DB User
+     mysql_user:
+       name: "test"
+       password: "admin123"
+       priv: "*.*:ALL"
+       host: '%'
+       state: present
+
+   - name: Fin del playbook
+     debug: msg="CONTENT = Este es el nodo2 - dataserver"
+
+- hosts: controller
+  become: true
+  tasks:
+   - name: Fin del playbook
+     debug: msg="CONTENT = Este es el nodo controller"
