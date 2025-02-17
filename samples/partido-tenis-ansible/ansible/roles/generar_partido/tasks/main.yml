@@ -1,0 +1,23 @@
+---
+- name: Incluyendo variables desde archivo partido_vars.yml
+  include_vars:
+    file: ../vars/partido_vars.yml
+
+- name: Obteniendo datos del segundo jugador desde la API random-data-api.com
+  uri:
+    url: https://random-data-api.com/api/users/random_user?size=1
+    return_content: yes
+  register: jugador2_data
+
+- name: Convirtiendo datos del jugador_2 a JSON
+  set_fact:
+    jugador2: "{{ jugador2_data.json | first }}"
+
+- name: Generarando el archivo partido.txt dentro de la carpeta /vagrant/
+  template:
+    src: partido.txt.j2
+    dest: /vagrant/partido.txt
+
+- name: Mostrando el contenido del archivo partido.txt
+  debug:
+    msg: "{{ lookup('file', '/vagrant/partido.txt') | split('\n') }}"

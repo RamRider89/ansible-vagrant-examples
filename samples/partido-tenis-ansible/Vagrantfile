@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Materia: Herramientas de Automatización de Despliegues
+# Actividad: Desarrollo práctico
+# Alumno: Carlos David Duarte Gill
+# Grupo: 1030
+
+VAGRANTFILE_API_VERSION = "2"
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # Inicializando de la maquina
+  config.vm.box = "ubuntu/jammy64"
+  config.vm.hostname = "partido-tenis"
+
+  # Capacidades de la maquina
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "partido-tenis"
+    vb.memory = "512"
+    vb.cpus = "1"
+  end
+
+  # Los archivos necesariios se encuentran en la coleccion partido_tenis
+  # Provisionador Ansible
+  config.vm.provision "ansible_local", run: "always" do |ansible|
+    ansible.compatibility_mode = "2.0"
+    ansible.inventory_path = "ansible/hosts"
+    ansible.playbook = "ansible/playbook.yml"
+    ansible.become = true
+    ansible.verbose = false
+    ansible.install = true
+  end
+
+end

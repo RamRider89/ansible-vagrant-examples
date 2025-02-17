@@ -1,0 +1,9 @@
+---
+- hosts: default
+  become: true
+  roles:
+    - role: generar_partido
+      vars:
+        first_name: Aitor
+        last_name: Menta
+        city: Madrid
